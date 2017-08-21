@@ -29,14 +29,13 @@ Both projects, four and five, focus on the understanding of the car surroundings
 video stream. More specifically project 4 comes back to the detection of lane lines as studied in project 1 (basic lane line detction) but 
 goes into more depth and approaches it on a technically more advanced level to allow more accurate tracking of curved lane lines
 by fitting a second order polynomial to detected lane line pixels.
-<br>
+
 Project five deals with the detection and tracking of vehicles in images from the dashcam videostream. For both projects the 
 videostream to use for lane/vehicle detection was recorded on highways. This is a less complex environment than city roads and provides a more suitable scope for this project.
-<br>
-<br>
+
+
 As both projects aim to be applied to the same video footage I decided to combine both projects and provided a single video showing both, my implementation of lane and vehicle detection.
- 
-<br>
+
 
 ## Source Code Oragnisation ##
 The projects source code structure started with project 4 in mind but then got extended to include vehicle detection (project 5) as well.
@@ -60,7 +59,7 @@ improve on the basic canny edge detection approach.
 
 
 ![alt_text][image03]
-*Lane lines detected through canny edge*
+*Figure 1:Lane lines detected through canny edge*
 
 
 Improvement in this take on lane line detection is, first and foremost, that we enable detection of curves by fitting a second order polynomial to the line pixels.
@@ -76,18 +75,18 @@ corners a correction matrix was computed and used to correct them.
 
 
 ![alt_text][image01]
-*One out of several chessboard camera calibration images*
+*Figure 2: One out of several chessboard camera calibration images*
 
 
 Below the same image is depicted in its original (first) and undistorted version (second). It is hardly possible to see distortions but the car at the left edge is no longer part of the image.
 
 
 ![alt_text][image06]
-*Original image*
+*Figure 3: Original image*
 
 
 ![alt_text][image07]
-*Undistorted image. The fact that the car at the left edge has been cut off is an indicator that the correction altered the image*
+*Figure 4: Undistorted image. The fact that the car at the left edge has been cut off is an indicator that the correction altered the image*
 
 
 ### 2. Detecting Lane Line Pixels
@@ -103,7 +102,7 @@ When those two functions agreed or the colour_threshold function returned 1 then
 
 
 ![alt_text][image08]
-*Binary mask of extracted lane pixels*
+*Figure 5: Binary mask of extracted lane pixels*
 
 
 ### 3. Perspective transform
@@ -115,7 +114,7 @@ the image so that the four points specified are the corners of the new images.
 
 
 ![alt_text][image04]
-*Perspective transformed binary mask of lane pixels*
+*Figure 6: Perspective transformed binary mask of lane pixels*
 
 
 From this top down view the pixels in x and y dimension can be mapped to meters which will later be used to calculate the curve radius and distance
@@ -133,10 +132,10 @@ approach was applied to the entire image resulting in pixel indices of the left 
 
 
 ![alt_text][image05]
-*Sliding window detection of left and right lane*
+*Figure 7: Sliding window detection of left and right lane*
 
 ![alt_text][image10]
-*Fitted lane lines in top view mask*
+*Figure 8: Fitted lane lines in top view mask*
 
 
 The second method operates with the knowledge of the last frames and the location of lanes lines in those. The new lane lines are found by
@@ -160,7 +159,7 @@ Curve radius and vehicle distance to center are drawn onto the image using cv2.p
 
 
 ![alt_text][image02]
-*Visualization of Lane Lines and display of curvature and position with respect to center*
+*Figure 9: Visualization of Lane Lines and display of curvature and position with respect to center*
 
 
 ### 7. Video Processing
@@ -187,10 +186,11 @@ which possess the value 1 where a vehicle is detected and 0 where it is not. The
 to feed smaller features, from early layers, into deeper layers as well. This architecture forms a U when graphed as seen below.
 
 ![alt_text][image1]
-*U-Net Architecture<cite>[Ronneberger et al.][1]</cite>*
+*Figure 10: U-Net Architecture<cite>[Ronneberger et al.][1]</cite>*
 
 This architecture was successfully used in semantic segmentation, the pixel wise classifaction of images, of images <cite>[Ronneberger et al.][1]</cite><cite>[2]</cite>. In this project it was used to just a detect a single class, vehicles, from the Udacity provided dataset. The provided dataset contained 
-cars and trucks which have been combined to a single vehicle class as all kinds of vehicles needed to be detected independent of the type. <br>
+cars and trucks which have been combined to a single vehicle class as all kinds of vehicles needed to be detected independent of the type.
+
 
 The dataset provided did not entail the accurate pixelwise masks that were usable for training but bounding boxes containing vehicles. The bounding boxes were converted to filled rectangles and used as input to train the UNet to output pixel masks 
 denoting vehicles. <br> 
@@ -199,7 +199,7 @@ so things were kept simple.
 
 ### Preparing the Training Data ###
 For the generation of the model that has been used for vehicle detection a Jupyter notebook has been used (Vehicle_detection_UNet.ipynb).
-<br>
+
 In it the crowdai dataset was prepared for use in a semantic segmentation neural network. The dataset consists of more than 66.000 frames of roadscene images with bounding box coordinates in a csv file.
 This format is in this form not suitable for a semantic segmentation network as we would need a mask that overlayed on the image shows the classes of depicted objects. This is typically done using colour coding.
 Here we merged the car and truck class of the dataset to a single vehicle class. We hence only need to distinguish between vehicle or no vehicle in the mask which will be the label of our network.
@@ -210,7 +210,7 @@ The masks were saved to files for use in the generator function.
 The generator was necessary as the entire dataset is too large to be processed at once and provides batches of 16 images at once. As subsequent frames in order would be too similar and would lead to a very biased model are the images chosen at random from the dataset.
 
 ![alt_text][image3]
-*Vehice mask generated from bounding box data*
+*Figure 11: Vehice mask generated from bounding box data*
 
 ### The U-Net Model ###
 Semantic segmentation competitions often evaluate models on Intersection over Union (IoU) which describes the intersection of the prediction and the ground truth devided by the union of both. 
@@ -220,10 +220,12 @@ A lambda layer was used to normalize the image integers to be zero centered.
 <br>
 After good experience with the ADAM optimizer it was chosen for training of this model as well.
 The loss function as well as the basic network architecture was taken from [2]. 
+
 ![alt_text][image2]
-*Original image, predicted mask and ground truth mask*
-<br>
-[image2] shows the original image, predicted mask and given mask side by side. This outcome together with a training IoU of ~0.9 suggested good performance. However when embedding it into the RoadImageStreamProcessor and processing the entire video 
+*Figure 12: Original image, predicted mask and ground truth mask*
+
+
+Figure 12 shows the original image, predicted mask and given mask side by side. This outcome together with a training IoU of ~0.9 suggested good performance. However when embedding it into the RoadImageStreamProcessor and processing the entire video 
 false positives were detected in the road barriers on the left. The training dataset exploration showed predominantly urban scenes and few, if any, motorway scenes. This could make the model underperform in motorway situations. Possibly the 
 metal of the barriers misleads the classifier. 
 
@@ -231,6 +233,11 @@ metal of the barriers misleads the classifier.
 ### Post-Processing ###
 To avoid false postives a temporal heatmap was used. This was implemented by summing up the masks of the last 20 frames and requiring that a mininum of 19 frames have to agree on the detection of a vehicle.
 Furthermore it was made a requirement for vehicle pixels to be detected on the last three consecutive frames in order to be displayed as a vehicle.
+
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/GBXiHHyBoEg/0.jpg)](https://www.youtube.com/watch?v=GBXiHHyBoEg)
+
+
 This helped and the smoothed the detection of vehicles over frames but did not solve the road boundary false positive.
 
 
@@ -240,6 +247,9 @@ The road boundary false positive posed a significant issue until the end. To imp
 With the semantic segmentation network only the classification of pixel in one image gets considered. Due to the temporal relation of all frames in camer footage there is a temporal aspect which could be exploited as well.
 I would like to try to combine the U-Net with long-short term modules (LSTM). I believe this could help avoid the boundaries beeing misclassified as cars.
 <br> Another, possibly simpler, approach would be to generate a confidence score map for each mask and apply a confidence threshold to avoid false positives. <cite>[Kendall et al.][3]</cite>
+
+Nevertheless I enjoyed playing with this cutting edge technology very much and consider this a success even though it might have been easier to get rid of the false positives with the more traditional machine learning + histogram of gradients approach. 
+I am looking forward to advanced deep learning module in term three to explore this technology in more detail.
 
 [1]:Ronneberger et al; https://arxiv.org/abs/1505.04597  
 [2]:https://github.com/jocicmarko/ultrasound-nerve-segmentation  
