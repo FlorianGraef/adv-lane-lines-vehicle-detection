@@ -57,7 +57,10 @@ The tracker uses a lane line class to track key properties of lane lines, like l
 Already in project 1 lanes were detected. Back then the basic approach was limited to finding straight lines, which resulted
 in inaccurate lane lines which were often comprised of many shorter lines drawn. In this project we revisit detecting lane lines but
 improve on the basic canny edge detection approach.  
+<br>
 ![alt_text][image03]
+*Lane lines detected through canny edge*
+<br>
 Improvement in this take on lane line detection is, first and foremost, that we enable detection of curves by fitting a second order polynomial to the line pixels.
 This has the advantage that we can draw curved lane boundaries in clean way, i.e. we do not have to compromise between a single line somewhat accurately, especially in curves, aligning with the actual lane lines
 and multiple small fragments fuzzily approximating the curved lane line. <br>
@@ -69,9 +72,16 @@ Having the coefficients of the fitted polynomials allowed the calculation of cur
 Even though current camera optics are at a high standard, images still show small distortions. To remove those a calibration matrix was calculated using photographs off chessboards patterns from different angles. Based on the location of the chessboards tiles' 
 corners a correction matrix was computed and used to correct them.
 ![alt_text][image01]
+*One out of several chessboard camera calibration images*
 
-Below the same image is depicted in its original (left) and undistorted version (right). It is hardly noticable to see distortions but it is obvious that the car at the left edge is no longer part of the image.
-![alt_text][image06] ![alt_text][image07]
+Below the same image is depicted in its original (first) and undistorted version (second). It is hardly possible to see distortions but the car at the left edge is no longer part of the image.
+
+![alt_text][image06]
+*Original image*
+<br>
+![alt_text][image07]
+*Undistorted image. The fact that the car at the left edge has been cut off is an indicator that the correction altered the image*
+
 
 ### 2. Detecting Lane Line Pixels
 To detect pixels which depict lane boundary markings the function colour_threshold of the road processor class analyses the saturation channel from the HLS colourspace and the value channel from the HSV colourspace were extracted and 
@@ -83,7 +93,10 @@ These values as well as this function were proposed in the Q&A Video for project
 This information was combined with the output of sobel processing in the x and y dimension. 
 For the x and y dimension 12-255 and 25-255 were used as the acceptance range. 
 When those two functions agreed or the colour_threshold function returned 1 then the pixel was considered part of the lane line.
+<br><br>
 ![alt_text][image08]
+*Binary mask of extracted lane pixels*
+<br>
 
 
 ### 3. Perspective transform
@@ -92,8 +105,10 @@ The obtained binary mask of lane pixels was transformed from the dashcam perspec
 E.g. in the top down view the lane lines are parallel and this feature can be used to validate the found lane lines. <br>
 The function get_trans_matrices in perception.py uses cv2.getPerspectiveTransform to warp a trapezoid depicting the two current lane lines to a rectangular image. cv2 does this by creating a matrix which stretches
 the image so that the four points specified are the corners of the new images.
-
+<br>
 ![alt_text][image04]
+*Perspective transformed binary mask of lane pixels*
+<br>
 
 From this top down view the pixels in x and y dimension can be mapped to meters which will later be used to calculate the curve radius and distance
 of the car to the center of the lane.
@@ -108,8 +123,15 @@ all lane pixels in each column of the lower half of the image. The two peaks ide
 As depicted below, windows were anaylsed around the peaks to find the the center of the next window if a threshold of minimum lane pixels was detected. This sliding window
 approach was applied to the entire image resulting in pixel indices of the left an right lane which then were used to fit a second order polynomial, the first lane line.
 
+<br>
+
 ![alt_text][image05]
+
+<br>
+
 ![alt_text][image10]
+
+<br>
 
 The second method operates with the knowledge of the last frames and the location of lanes lines in those. The new lane lines are found by
  searching near last frames fitted polynomial. A polynomial is fitted to these new lane line pixels.  
@@ -129,6 +151,7 @@ With the polynomials we are able to generate essential information for a self dr
 ### 6. Display Fitted Lane Lines
 The fitted lane mask was transformed back to the original perspective in the draw_lanes function for test images and then merged with the original image. <br>
 Curve radius and vehicle distance to center are drawn onto the image using cv2.putText.
+
 ![alt_text][image02]
 *Visualization of Lane Lines and display of curvature and position with respect to center*
 
