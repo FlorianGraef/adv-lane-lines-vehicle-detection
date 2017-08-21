@@ -65,7 +65,7 @@ Further lower level improvements include the undistortion of images through appl
 version of the canny edge detection method used in project 1.  
 Having the coefficients of the fitted polynomials allowed the calculation of curve radius and relative position of the car with respect to the lane center.
 
-###1. Camera Calibration and Undistortion ###
+### 1. Camera Calibration and Undistortion ###
 Even though current camera optics are at a high standard, images still show small distortions. To remove those a calibration matrix was calculated using photographs off chessboards patterns from different angles. Based on the location of the chessboards tiles' 
 corners a correction matrix was computed and used to correct them.
 ![alt_text][image01]
@@ -73,7 +73,7 @@ corners a correction matrix was computed and used to correct them.
 Below the same image is depicted in its original (left) and undistorted version (right). It is hardly noticable to see distortions but it is obvious that the car at the left edge is no longer part of the image.
 ![alt_text][image06] ![alt_text][image07]
 
-###2. Detecting Lane Line Pixels
+### 2. Detecting Lane Line Pixels
 To detect pixels which depict lane boundary markings the function colour_threshold of the road processor class analyses the saturation channel from the HLS colourspace and the value channel from the HSV colourspace were extracted and 
 thresholded.
 
@@ -86,7 +86,7 @@ When those two functions agreed or the colour_threshold function returned 1 then
 ![alt_text][image08]
 
 
-###3. Perspective transform
+### 3. Perspective transform
 
 The obtained binary mask of lane pixels was transformed from the dashcam perspective to a birds-eye view to make lane detection easier. The top-down view is helpful because the comparison of lane line polynomials gets easier.
 E.g. in the top down view the lane lines are parallel and this feature can be used to validate the found lane lines. <br>
@@ -98,7 +98,7 @@ the image so that the four points specified are the corners of the new images.
 From this top down view the pixels in x and y dimension can be mapped to meters which will later be used to calculate the curve radius and distance
 of the car to the center of the lane.
 
-###4. Detect Lanes
+### 4. Detect Lanes
 Two approaches have been implemented to identify lane lines.  
 The first one aims to find lane lines without knowledge of previous lane lines. This will be used for detecting lanes on individual test images, the first frame of a video
 and when the lane lines were not detected for an certain amount of frames.  
@@ -120,18 +120,18 @@ The lane line distances were monitored when the wrong line got detected and the 
 To ensure parallel lane lines the difference in the first polynomial coefficient was observed and a sufficiently small limit chosen to 
 sanity check for similar curvature.
 
-###5. Curve Radius and Vehicle Position
+### 5. Curve Radius and Vehicle Position
 With the polynomials we are able to generate essential information for a self driving car: The curvature of the road and the location of the car with respect to the lane center. <br>
  Based on this information the vehicle can calculate the necessary steering angles to look ahead and stay in lane long term but as well micro-adjust to stay perfectly centered.
  I calculate the radius in the lane_line class in the function calc_curv_rad based on the "Measuring Curvature" chapter of the Udacity lectures.
  Vehicle position is calculated as the distance of the center point at the bottom edge of the image to the center of the two detected lane lines at the bottom edge.
 
-###6. Display Fitted Lane Lines
+### 6. Display Fitted Lane Lines
 The fitted lane mask was transformed back to the original perspective in the draw_lanes function for test images and then merged with the original image. <br>
 Curve radius and vehicle distance to center are drawn onto the image using cv2.putText.
 ![alt_text][image03]
 
-###7. Video Processing
+### 7. Video Processing
 Processing an entire stream of consecutive frames can be seen as just a series of individual images but consecutive images will show a similiarity to the previous frames. 
  To speed up the detection of lane lines as described above, the lighter lane finding method has been used when past information of lanes is present and of sufficient quality (sanity checks).
 To aid this scenario the RoadImageStreamProcessor class checks the status of detected lanes and decides whether the full scan or a light scan is to be issued.<br>
@@ -186,9 +186,10 @@ A lambda layer was used to normalize the image integers to be zero centered.
 <br>
 After good experience with the ADAM optimizer it was chosen for training of this model as well.
 The loss function as well as the basic network architecture was taken from [2]. 
-![alt_text][image3]
-
-[image3] shows the original image, predicted mask and given mask side by side. This outcome together with a training IoU of ~0.9 suggested a good performance. However whenn embedding it into the RoadImageStreamProcessor and processing the entire video 
+![alt_text][image2]
+*Original image, predicted mask and ground truth mask*
+<br>
+[image2] shows the original image, predicted mask and given mask side by side. This outcome together with a training IoU of ~0.9 suggested good performance. However when embedding it into the RoadImageStreamProcessor and processing the entire video 
 false positives were detected in the road barriers on the left. The training dataset exploration showed predominantly urban scenes and few, if any, motorway scenes. This could make the model underperform in motorway situations. Possibly the 
 metal of the barriers misleads the classifier. 
 
