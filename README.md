@@ -129,7 +129,8 @@ With the polynomials we are able to generate essential information for a self dr
 ### 6. Display Fitted Lane Lines
 The fitted lane mask was transformed back to the original perspective in the draw_lanes function for test images and then merged with the original image. <br>
 Curve radius and vehicle distance to center are drawn onto the image using cv2.putText.
-![alt_text][image03]
+![alt_text][image02]
+*Visualization of Lane Lines and display of curvature and position with respect to center*
 
 ### 7. Video Processing
 Processing an entire stream of consecutive frames can be seen as just a series of individual images but consecutive images will show a similiarity to the previous frames. 
@@ -155,6 +156,7 @@ which possess the value 1 where a vehicle is detected and 0 where it is not. The
 to feed smaller features, from early layers, into deeper layers as well. This architecture forms a U when graphed as seen below.
 
 ![alt_text][image1]
+*U-Net Architecture<cite>[Ronneberger et al.][1]</cite>*
 
 This architecture was successfully used in semantic segmentation, the pixel wise classifaction of images, of images <cite>[Ronneberger et al.][1]</cite><cite>[2]</cite>. In this project it was used to just a detect a single class, vehicles, from the Udacity provided dataset. The provided dataset contained 
 cars and trucks which have been combined to a single vehicle class as all kinds of vehicles needed to be detected independent of the type. <br>
@@ -177,6 +179,7 @@ The masks were saved to files for use in the generator function.
 The generator was necessary as the entire dataset is too large to be processed at once and provides batches of 16 images at once. As subsequent frames in order would be too similar and would lead to a very biased model are the images chosen at random from the dataset.
 
 ![alt_text][image3]
+*Vehice mask generated from bounding box data*
 
 ### The U-Net Model ###
 Semantic segmentation competitions often evaluate models on Intersection over Union (IoU) which describes the intersection of the prediction and the ground truth devided by the union of both. 
