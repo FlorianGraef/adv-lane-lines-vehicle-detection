@@ -2,6 +2,8 @@ from collections import deque
 
 import cv2
 #import matplotlib.pyplot as plt
+from scipy.ndimage.measurements import label
+
 from lane_line import LaneLine
 from lane_line_tracker import Tracker
 import numpy as np
@@ -82,6 +84,21 @@ def colour_threshold(image, sthreshold=(0, 255), vthreshold=(0, 255)):
     output[(s_binary == 1) & (v_binary == 1)] = 1
     return output
 
+# taken from the lectures
+def draw_labeled_bboxes(img, labels):
+    # Iterate through all detected cars
+    for car_number in range(1, labels[1]+1):
+        # Find pixels with each car_number label value
+        nonzero = (labels[0] == car_number).nonzero()
+        # Identify x and y values of those pixels
+        nonzeroy = np.array(nonzero[0])
+        nonzerox = np.array(nonzero[1])
+        # Define a bounding box based on min/max x and y
+        bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
+        # Draw the box on the image
+        cv2.rectangle(img, bbox[0], bbox[1], (0,0,255), 2)
+    # Return the image
+    return img
 
 class RoadImageStreamProcessor(object):
     def transform(self, org_img):
@@ -112,18 +129,18 @@ class RoadImageStreamProcessor(object):
         self.vehicle_tracker = VehicleInference(model_path, nn_imput_dims)
 
     def process_image(self, img):
-        #img_for_nn = histogram_normalization(img)
-
-
         mask = self.vehicle_tracker.get_mask(img)
         self.last_masks.append(mask)
         heat_map = np.sum(self.last_masks, axis=0)
         #cv2.imshow("heatmap", heat_map)
 
-
         #cv2.imshow("mask", mask)
         mask = self.prepare_mask(heat_map, self.last_masks)
-        #cv2.imshow("mask", mask)
+
+        # find vehicle labels
+        labels = label(mask)
+
+      #  cv2.imshow("mask", drawn_bb)
         top_img = self.transform(img)
 
         if self.detect_gap >= self.allowed_detect_gap:
@@ -138,16 +155,20 @@ class RoadImageStreamProcessor(object):
 
         rewarped = draw_lanes(self.Minv, top_img, img, self.left_lane, self.right_lane, self.tracker.dist_from_center)
         rewarped = cv2.addWeighted(mask,0.5,rewarped,1,0, dtype=cv2.CV_8UC3)
+        rewarped = draw_labeled_bboxes(rewarped, labels)
         rewarped = cv2.cvtColor(rewarped, cv2.COLOR_BGR2RGB)
+
         #cv2.imshow("combined", rewarped)
         return rewarped
 
     def prepare_mask(self, mask, last_masks, detec_tresh=19):
+
         if len(last_masks) >=3:
             mask[(last_masks[-1] < 0.5) & (last_masks[-2] < 0.5) & (last_masks[-3] < 0.5)] = 0
         mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2RGB)
         mask = cv2.convertScaleAbs(mask)
         mask[:, :, 0:1] = 0
+        mask[:int(mask.shape[0]*0.55),:,:] = 0 # exclude sky from being masked
         mask[mask <= detec_tresh] = 0
         mask = mask * 255
         mask = cv2.resize(mask, self.img_size)
