@@ -168,7 +168,7 @@ Processing an entire stream of consecutive frames can be seen as just a series o
 To aid this scenario the RoadImageStreamProcessor class checks the status of detected lanes and decides whether the full scan or a light scan is to be issued.<br>
 Additionally stabilization of lane lines was implemented by averaging polynomials coefficients for lane drawing over the last 5 frames.
 The resulting video has been released on youtube.
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/GBXiHHyBoEg/0.jpg)](https://www.youtube.com/watch?v=GBXiHHyBoEg)
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/nic-Hfa_CG4/0.jpg)](https://www.youtube.com/watch?v=nic-Hfa_CG4)
 
 ### Discussion
 As it can be seen in the linked video the resulting lane detector works well. 
@@ -235,7 +235,7 @@ To avoid false postives a temporal heatmap was used. This was implemented by sum
 Furthermore it was made a requirement for vehicle pixels to be detected on the last three consecutive frames in order to be displayed as a vehicle.
 
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/GBXiHHyBoEg/0.jpg)](https://www.youtube.com/watch?v=GBXiHHyBoEg)
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/nic-Hfa_CG4/0.jpg)](https://www.youtube.com/watch?v=nic-Hfa_CG4)
 
 
 This helped and the smoothed the detection of vehicles over frames but did not solve the road boundary false positive.
