@@ -48,7 +48,8 @@ class LaneLine():
     def calc_curv_rad(self, ym_perpix, xm_perpix):
         curv_fit = np.polyfit(np.array(self.recent_yfitted)*ym_perpix, np.array(self.recent_xfitted[-1])*xm_perpix, 2)
         y_eval = np.min(self.recent_yfitted)
-        curv_rad = ((1+ (2 * curv_fit[0]*y_eval*ym_perpix + curv_fit[1])**2)/np.absolute(2*curv_fit[0]))
+        curv_rad = ((1 + (2 * curv_fit[0] * y_eval * ym_perpix + curv_fit[1]) ** 2) ** 1.5) / np.absolute(
+            2 * curv_fit[0])
         self.radius_of_curvature = curv_rad
         return curv_rad
 
