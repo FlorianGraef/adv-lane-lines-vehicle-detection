@@ -237,8 +237,8 @@ Furthermore it was made a requirement for vehicle pixels to be detected on the l
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/nic-Hfa_CG4/0.jpg)](https://www.youtube.com/watch?v=nic-Hfa_CG4)
 
-
-This helped and the smoothed the detection of vehicles over frames but did not solve the road boundary false positive.
+Furthermore detections in the upper 55% of the image have been excluded as well.
+These measures helped and smoothed the detection of vehicles over frames but did not solve the road boundary false positive.
 
 
 ### Discussion ###
