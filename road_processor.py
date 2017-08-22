@@ -96,7 +96,7 @@ def draw_labeled_bboxes(img, labels):
         # Define a bounding box based on min/max x and y
         bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
         # Draw the box on the image
-        cv2.rectangle(img, bbox[0], bbox[1], (0,0,255), 2)
+        cv2.rectangle(img, bbox[0], bbox[1], (255,0,0), 4)
     # Return the image
     return img
 
@@ -124,18 +124,19 @@ class RoadImageStreamProcessor(object):
         self.M = M
         self.Minv = Minv
         self.img_size = img_size
-        self.last_masks = deque(maxlen=20)
+        self.last_masks = deque(maxlen=5)
 
         self.vehicle_tracker = VehicleInference(model_path, nn_imput_dims)
 
     def process_image(self, img):
         mask = self.vehicle_tracker.get_mask(img)
+
         self.last_masks.append(mask)
         heat_map = np.sum(self.last_masks, axis=0)
-        #cv2.imshow("heatmap", heat_map)
+        cv2.imshow("heatmap", heat_map)
 
         #cv2.imshow("mask", mask)
-        mask = self.prepare_mask(heat_map, self.last_masks)
+        mask = self.prepare_mask(heat_map, self.last_masks, detec_tresh=2)
 
         # find vehicle labels
         labels = label(mask)
@@ -149,7 +150,6 @@ class RoadImageStreamProcessor(object):
         else:
             self.tracker.process_next_image(top_img, self.left_lane, self.right_lane)
             if not (self.left_lane.detected & self.right_lane.detected):
-                #self.tracker.process_independent_image(top_img, self.left_lane, self.right_lane)
                 self.detect_gap += 1
         # reverse transform and draw on original
 
@@ -161,13 +161,13 @@ class RoadImageStreamProcessor(object):
         #cv2.imshow("combined", rewarped)
         return rewarped
 
-    def prepare_mask(self, mask, last_masks, detec_tresh=19):
-
-        if len(last_masks) >=3:
-            mask[(last_masks[-1] < 0.5) & (last_masks[-2] < 0.5) & (last_masks[-3] < 0.5)] = 0
+    def prepare_mask(self, mask, last_masks, detec_tresh=17):
+        # feature removed due to reviewer comment
+        # if len(last_masks) >=3:
+        #     mask[(last_masks[-1] < 0.5) & (last_masks[-2] < 0.5) & (last_masks[-3] < 0.5)] = 0
         mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2RGB)
         mask = cv2.convertScaleAbs(mask)
-        mask[:, :, 0:1] = 0
+        mask[:, :, 1:2] = 0
         mask[:int(mask.shape[0]*0.55),:,:] = 0 # exclude sky from being masked
         mask[mask <= detec_tresh] = 0
         mask = mask * 255
