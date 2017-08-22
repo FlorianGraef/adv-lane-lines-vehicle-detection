@@ -240,6 +240,14 @@ Furthermore it was made a requirement for vehicle pixels to be detected on the l
 Furthermore detections in the upper 55% of the image have been excluded as well.
 These measures helped and smoothed the detection of vehicles over frames but did not solve the road boundary false positive.
 
+**Amendment:** The detection heatmap threshold has been, implementing a improvement suggestion, lowered substantially and the requirement to have the last 3 frames agree on vehicle pixels lifted.
+The result of this is that vehicles do get detected with larger masks/bounding boxes and a bit earlier but more noise gets detected too. This resulted in an increase in small false postive detections along the road barrier.
+
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/5504IKXZ_xc/0.jpg)](https://www.youtube.com/watch?v=5504IKXZ_xc)
+*Amended Vehicle and Lane Detection Video. Substantially less stringent restrictions and heatmap threshold have been used resulting in a more responsive detection but as well more noise.*
+
+Furthermore the bounding boxes and masks are no longer as stable as before. I considered both results valuable and kept the old one in this report to show both sides of the tradeoff.
 
 ### Discussion ###
 The road boundary false positive posed a significant issue until the end. To improve the performance a dataset with more highway data could ease the problem. 
